@@ -7,12 +7,11 @@ jobs:
 
     steps:
       - checkout
-      - run:
-          name: Install and download Gradle
-          command: wget https://services.gradle.org/distributions/gradle-6.9.1-bin.zip
-            unzip -d /opt gradle-6.9.1-bin.zip
-            echo $PATH
-            export PATH=$PATH:/opt/gradle-6.9.1/bin
+#      - run:
+#          name: Install and download Gradle
+#          command: wget https://services.gradle.org/distributions/gradle-6.9.1-bin.zip
+#            unzip -d /opt gradle-6.9.1-bin.zip
+#            export PATH=$PATH:/opt/gradle-6.9.1/bin
 
       - run:
           name: Build and Test
