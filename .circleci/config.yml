@@ -7,7 +7,9 @@ jobs:
 
     steps:
       - checkout
-
+      - run:
+          name: Install Gradle
+          command: ./gradlew wrapper --gradle-version=6.9.1
       - run:
           name: Build and Test
           command: ./gradlew build
