@@ -8,8 +8,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install Gradle
-          command: ./gradlew wrapper --gradle-version=6.9.1
+          name: Install and download Gradle
+          command: wget https://services.gradle.org/distributions/gradle-6.9.1-bin.zip
+            unzip -d /opt gradle-6.9.1-bin.zip
+            export PATH=$PATH:/opt/gradle-6.9.1/bin
+
       - run:
           name: Build and Test
           command: ./gradlew build
