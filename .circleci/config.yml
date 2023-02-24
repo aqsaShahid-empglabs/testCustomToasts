@@ -1,33 +1,48 @@
 version: 2.1
 
-jobs:
-  build:
-    docker:
-      - image: circleci/openjdk:11-jdk
+orbs:
+  android: circleci/android@1.0.3
 
+references:
+  android_config: &android_config
+    executor:
+      name: android/android-machine
+      resource-class: large
+    environment:
+      # Configure the JVM and Gradle to avoid OOM errors
+      _JAVA_OPTIONS: "-Xmx4g"
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
+
+  #  android_dependencies: &android_dependencies
+  #    run:
+  #      name: Download Dependencies
+  #      command: ./gradlew androidDependencies
+
+jobs:
+  debug-build:
+    <<: *android_config
     steps:
       - checkout
-#      - run:
-#          name: Install and download Gradle
-#          command: wget https://services.gradle.org/distributions/gradle-6.9.1-bin.zip
-#            unzip -d /opt gradle-6.9.1-bin.zip
-#            export PATH=$PATH:/opt/gradle-6.9.1/bin
-
+      #      - *android_dependencies
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
-          name: Build and Test
-          command: ./gradlew build
-
-      - run:
-          name: Publish to JitPack
-          command: |
-            curl -L https://github.com/jitpack/jitpack-cli/releases/download/v1.4.1/jitpack-cli-1.4.1.jar -o jitpack-cli.jar
-            java -jar jitpack-cli.jar --build --no-notify --release
-            echo "Library published to JitPack."
-
+          name: Build PropertyManagementModule
+          command: ./gradlew clean assembleRelease
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+  #      - store_artifacts: # for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
+  #          path: app/build/reports
+  #          destination: reports
+  #      - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+  #          path: app/build/test-results
 workflows:
-  build:
+  version: 2
+  workflow:
     jobs:
-      - build:
+      - debug-build:
           filters:
             tags:
-              only: /^v[0-9]+(\.[0-9]+)*(-[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?$/
+              only: /.*/
